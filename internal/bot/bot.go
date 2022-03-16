@@ -81,6 +81,14 @@ func (b *Bot) HandleMessages(ctx context.Context) error {
 }
 
 func (b *Bot) handleUpdate(ctx context.Context, update tgbotapi.Update) {
+	if update.CallbackQuery != nil {
+		b.handleCallback(ctx, update.CallbackQuery)
+	}
+
+	if update.Message == nil {
+		return
+	}
+
 	if update.Message.IsCommand() {
 		b.handleCommand(ctx, update)
 	}
@@ -100,15 +108,20 @@ func (b *Bot) handleStart(ctx context.Context, update tgbotapi.Update) {
 	chatId := update.Message.Chat.ID
 
 	_, ok := b.userStore.IsRegistred(ctx, int(userId))
-	if !ok {
-		err := b.handleFirstStart(userId, chatId)
+	if ok {
+		msg := tgbotapi.NewMessage(chatId, "Выберете меню")
+		msg.ReplyMarkup = startNK
+		_, err := b.api.Send(msg)
 		if err != nil {
 			b.sendErrLog(update, err)
 		}
-
 		return
 	}
 
+	err := b.handleFirstStart(userId, chatId)
+	if err != nil {
+		b.sendErrLog(update, err)
+	}
 }
 
 func (b *Bot) handleFirstStart(userId, chatId int64) error {
@@ -135,4 +148,19 @@ func (b *Bot) handleRegistration(ctx context.Context, update tgbotapi.Update) {
 	}
 
 	b.userStore.Register(ctx, id, "mock-role")
+}
+
+func (b *Bot) handleCallback(ctx context.Context, callback *tgbotapi.CallbackQuery) {
+	log.Println(callback.Message)
+
+	edit := tgbotapi.NewEditMessageText(
+		callback.Message.Chat.ID,
+		callback.Message.MessageID,
+		callback.Data,
+	)
+
+	_, err := b.api.Send(edit)
+	if err != nil {
+
+	}
 }

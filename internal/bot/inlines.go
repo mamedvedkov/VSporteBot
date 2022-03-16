@@ -17,8 +17,11 @@ var exampleNumericKeyboard = tgbotapi.NewInlineKeyboardMarkup(
 
 var startNK = tgbotapi.NewInlineKeyboardMarkup(
 	tgbotapi.NewInlineKeyboardRow(
-		tgbotapi.NewInlineKeyboardButtonSwitch("switch", "switch"),
-		tgbotapi.NewInlineKeyboardButtonData("data", "data"),
-		tgbotapi.NewInlineKeyboardButtonURL("url", "http://1.com"),
+		tgbotapi.NewInlineKeyboardButtonData("Моя зп", "2"),
+		tgbotapi.NewInlineKeyboardButtonData("У меня тупой вопрос", "3"),
+	),
+	tgbotapi.NewInlineKeyboardRow(
+		tgbotapi.NewInlineKeyboardButtonData("Мои данные", "5"),
+		tgbotapi.NewInlineKeyboardButtonData("Как это работает", "6"),
 	),
 )
