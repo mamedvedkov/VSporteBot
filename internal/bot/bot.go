@@ -3,10 +3,11 @@ package bot
 import (
 	"context"
 	"fmt"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"log"
 	"strconv"
 	"sync"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 type RegistredUsersStore interface {
@@ -36,7 +37,7 @@ func New(
 		log.Panic(err)
 	}
 
-	api.Debug = true
+	// api.Debug = true
 
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
@@ -55,7 +56,6 @@ func New(
 			}
 
 			return &pool
-
 		}(),
 		updates:   updates,
 		userStore: userStore,
@@ -65,7 +65,6 @@ func New(
 }
 
 func (b *Bot) HandleMessages(ctx context.Context) error {
-
 	for {
 		select {
 		case <-ctx.Done():
@@ -110,7 +109,7 @@ func (b *Bot) handleStart(ctx context.Context, update tgbotapi.Update) {
 	_, ok := b.userStore.IsRegistred(ctx, int(userId))
 	if ok {
 		msg := tgbotapi.NewMessage(chatId, "Выберете меню")
-		msg.ReplyMarkup = startNK
+		msg.ReplyMarkup = mainMenuIK
 		_, err := b.api.Send(msg)
 		if err != nil {
 			b.sendErrLog(update, err)
@@ -148,19 +147,4 @@ func (b *Bot) handleRegistration(ctx context.Context, update tgbotapi.Update) {
 	}
 
 	b.userStore.Register(ctx, id, "mock-role")
-}
-
-func (b *Bot) handleCallback(ctx context.Context, callback *tgbotapi.CallbackQuery) {
-	log.Println(callback.Message)
-
-	edit := tgbotapi.NewEditMessageText(
-		callback.Message.Chat.ID,
-		callback.Message.MessageID,
-		callback.Data,
-	)
-
-	_, err := b.api.Send(edit)
-	if err != nil {
-
-	}
 }

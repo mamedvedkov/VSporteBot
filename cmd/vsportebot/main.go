@@ -1,8 +1,8 @@
 package main
 
 import (
-	"context"
 	"github.com/mamedvedkov/VSporteBot/internal/bot"
+	"github.com/mamedvedkov/tools/app"
 	"github.com/mamedvedkov/tools/env"
 )
 
@@ -12,11 +12,14 @@ const (
 )
 
 func main() {
+	_app := app.NewApp()
+
 	token := env.Get(envToken).MustString()
 	maintainerId := env.Get(envMaintainerId).MustInt()
 
 	_bot := bot.New(token, maintainerId, 5, newRegisterStore())
 
-	err := _bot.HandleMessages(context.Background())
-	panic(err)
+	_app.AddWorkers(_bot.HandleMessages)
+
+	_app.Run()
 }
