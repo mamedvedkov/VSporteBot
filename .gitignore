@@ -17,3 +17,7 @@
 *.env
 .idea
 credentials.json
+inn.json
+compensation.pdf
+szInstruction.pdf
+current-image-id.txt
