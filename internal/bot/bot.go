@@ -112,11 +112,6 @@ func (b *Bot) handleUpdate(ctx context.Context, update tgbotapi.Update) {
 		return
 	}
 
-	if update.Message.IsCommand() {
-		b.handleCommand(ctx, update)
-		return
-	}
-
 	ok, err := b.authorize(update.Message.From.ID)
 	if err != nil {
 		b.logger.Error(err, "auth error")
@@ -132,11 +127,14 @@ func (b *Bot) handleUpdate(ctx context.Context, update tgbotapi.Update) {
 		b.forwardToFinDep(update)
 	}
 
-	//msg := tgbotapi.NewMessage(update.Message.From.ID, "неверный формат ссылки на чек")
-	//_, err = b.api.Send(msg)
-	//if err != nil {
-	//	b.sendErrLog(update, err)
-	//}
+	if update.Message.Text == "Главное меню" {
+		b.handleMainByText(ctx, update)
+	}
+
+	if update.Message.IsCommand() {
+		b.handleCommand(ctx, update)
+		return
+	}
 }
 
 func (b *Bot) authorize(id int64) (bool, error) {
@@ -145,10 +143,6 @@ func (b *Bot) authorize(id int64) (bool, error) {
 }
 
 func (b *Bot) handleCommand(ctx context.Context, update tgbotapi.Update) {
-	msg := tgbotapi.NewMessage(update.Message.From.ID, "-_-")
-	msg.ReplyMarkup = testKeyboard
-	b.api.Send(msg)
-
 	ok, err := b.authorize(update.Message.From.ID)
 	if err != nil {
 		b.logger.Error(err, "auth error")
@@ -169,21 +163,28 @@ func (b *Bot) handleCommand(ctx context.Context, update tgbotapi.Update) {
 	}
 }
 
-func (b *Bot) handleStart(ctx context.Context, userId, chatId int64, authorized bool) {
+func (b *Bot) handleMainByText(ctx context.Context, update tgbotapi.Update) {
+	_delete := tgbotapi.NewDeleteMessage(update.Message.Chat.ID, update.Message.MessageID)
+	b.api.Send(_delete)
 
-	if authorized {
-		msg := tgbotapi.NewMessage(chatId,
-			"Привет! Это бот финансового департамента команды VSporte."+
-				" Пожалуйста, выбери интересующее тебя меню")
-		msg.ReplyMarkup = mainMenuIK()
-		_, err := b.api.Send(msg)
+	b.handleStart(ctx, update.Message.From.ID, update.Message.Chat.ID, true)
+}
+
+func (b *Bot) handleStart(ctx context.Context, userId, chatId int64, authorized bool) {
+	if !authorized {
+		err := b.handleFirstStart(userId, chatId)
 		if err != nil {
 			b.logger.Error(err, "send error")
 		}
+
 		return
 	}
 
-	err := b.handleFirstStart(userId, chatId)
+	msg := tgbotapi.NewMessage(chatId,
+		"Привет! Это бот финансового департамента команды VSporte."+
+			" Пожалуйста, выбери интересующее тебя меню")
+	msg.ReplyMarkup = mainMenuIK()
+	_, err := b.api.Send(msg)
 	if err != nil {
 		b.logger.Error(err, "send error")
 	}
@@ -197,7 +198,7 @@ func (b *Bot) handleFirstStart(userId, chatId int64) error {
 			"Нажмите для копирования, ваш ID: "+
 			fmt.Sprintf("`%v`", userId),
 	)
-
+	msg.ReplyMarkup = testKeyboard
 	msg.ParseMode = tgbotapi.ModeMarkdownV2
 
 	_, err := b.api.Send(msg)
