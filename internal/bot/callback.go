@@ -115,15 +115,13 @@ func (b *Bot) handleMyPayment(ctx context.Context, callBack *tgbotapi.CallbackQu
 	var text string
 
 	text = "В этом разделе ты можешь посмотреть данные за предыдущий месяц," +
-		" *предварительные* данные за текущий и получить ссылку на детализированную ведомость"
+		"предварительные данные за текущий и получить ссылку на детализированную ведомость"
 
 	edit := tgbotapi.NewEditMessageText(
 		callBack.Message.Chat.ID,
 		callBack.Message.MessageID,
 		text,
 	)
-
-	edit.ParseMode = tgbotapi.ModeMarkdown
 
 	return &edit
 }

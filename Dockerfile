@@ -10,17 +10,17 @@ RUN apk --no-cache add ca-certificates tzdata && \
 
 WORKDIR /app
 
+COPY ./credentials.json /
+COPY ./inn.json /
+COPY ./compensation.pdf /
+COPY ./szInstruction.pdf /
 COPY ./cmd ./cmd
 COPY ./internal ./internal
 COPY ./vendor ./vendor
 COPY ./go.mod ./
 COPY ./go.sum ./
-COPY ./credentials.json /
-COPY ./inn.json /
-COPY ./compensation.pdf /
-COPY ./szInstruction.pdf /
 
-RUN go build -mod=vendor -o /vsportebot ./cmd/vsportebot
+RUN GOOS=linux GOARCH=amd64 go build -mod=vendor -o /vsportebot ./cmd/vsportebot
 
 FROM scratch
 
