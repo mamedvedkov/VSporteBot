@@ -1,6 +1,9 @@
-build:
-	docker build --rm --iidfile current-image-id.txt .
-start:
-	docker run -dt --env-file .env `cat current-image-id.txt`
-prune_builders:
-	docker image prune --filter label=stage=builder
+IMAGE:=mamedvedkov/vsporte_bot
+VERSION:=v1.0.1
+
+docker-build:
+	@docker build --tag ${IMAGE}:${VERSION} .
+	@docker tag ${IMAGE}:${VERSION} ${IMAGE}:latest
+docker-push:
+	@docker push ${IMAGE}:${VERSION}
+	@docker push ${IMAGE}:latest
